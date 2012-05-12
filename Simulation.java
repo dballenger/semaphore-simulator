@@ -3,7 +3,7 @@ import java.io.*;
 
 public class Simulation {
   private final static int TIME_TO_CROSS = 3;
-  private final static int PREVENT_STARVATION = 0;
+  private final static int PREVENT_STARVATION = 1;
   
   public static void main(String argv[]) {
     System.out.println("Monkey simulator");
@@ -97,6 +97,7 @@ public class Simulation {
     */
     int eastBound = 0;
     int westBound = 0;
+    int preempt = 0;
     int timer = 0;
     
     /**
@@ -123,35 +124,45 @@ public class Simulation {
           /**
            The coast is clear, we can head east
            */ 
-          if (westBound == 0) {
-            eastBound++;
-            
-            System.out.println("Baboon " + baboon.getIdentifier() + " has begun crossing " + (baboon.getDirection() == Baboon.EAST ? "East" : "West") + " bound");
-            
-            baboon.setTimeSlot(timer);
-            crossing.add(baboon);
+          if (westBound == 0 && preempt == 0) {
+            if (PREVENT_STARVATION == 1 && eastBound > 2 && this.waitingDirection(baboons, Baboon.WEST) > 0) {
+              preempt = 1;
+              wantToCross.add(baboon);
+              
+              System.out.println("Preventing starvation, preempting...");
+            } else {
+              eastBound++;
+              
+              System.out.println("Baboon " + baboon.getIdentifier() + " has begun crossing " + (baboon.getDirection() == Baboon.EAST ? "East" : "West") + " bound");
+              
+              baboon.setTimeSlot(timer);
+              crossing.add(baboon);
+            }
           } else {
             System.out.println("Baboon " + baboon.getIdentifier() + " wants to cross " + (baboon.getDirection() == Baboon.EAST ? "East" : "West") + " bound but can't");
-            if (PREVENT_STARVATION == 0) {
-              wantToCross.add(baboon);
-            }
+            wantToCross.add(baboon);
           }
         } else if (baboon.getDirection() == Baboon.WEST) {
           /**
            The coast is clear, we can head west
           */
-          if (eastBound == 0) {
-            westBound++;
-            
-            System.out.println("Baboon " + baboon.getIdentifier() + " has begun crossing " + (baboon.getDirection() == Baboon.EAST ? "East" : "West") + " bound");
-            
-            baboon.setTimeSlot(timer);
-            crossing.add(baboon);
+          if (eastBound == 0 && preempt == 0) {
+            if (PREVENT_STARVATION == 1 && westBound > 2 && this.waitingDirection(baboons, Baboon.EAST) > 0) {
+              preempt = 1;
+              wantToCross.add(baboon);
+              
+              System.out.println("Preventing starvation, preempting...");
+            } else {
+              westBound++;
+              
+              System.out.println("Baboon " + baboon.getIdentifier() + " has begun crossing " + (baboon.getDirection() == Baboon.EAST ? "East" : "West") + " bound");
+              
+              baboon.setTimeSlot(timer);
+              crossing.add(baboon);
+            }
           } else {
             System.out.println("Baboon " + baboon.getIdentifier() + " wants to cross " + (baboon.getDirection() == Baboon.EAST ? "East" : "West") + " bound but can't");
-            if (PREVENT_STARVATION == 0) {
-              wantToCross.add(baboon);
-            }
+            wantToCross.add(baboon);
           }
         }
       }
@@ -175,6 +186,10 @@ public class Simulation {
         }
       }
       
+      if (PREVENT_STARVATION == 1 && preempt != 0 && crossing.size() == 0) {
+        preempt = 0;
+      }
+      
       timer++;
       baboon = null;
       
@@ -187,5 +202,17 @@ public class Simulation {
         }
       });
     }
+  }
+  
+  private int waitingDirection(ArrayList<Baboon> baboons, int direction) {
+    int count = 0;
+    
+    for(Baboon b : baboons) {
+      if (b.getDirection() == direction) {
+        count++;
+      }
+    }
+    
+    return count;
   }
 }
