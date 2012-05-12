@@ -8,6 +8,16 @@ public class Simulation {
   public static void main(String argv[]) {
     System.out.println("Monkey simulator");
     
+    Simulation sim = new Simulation();
+    
+    sim.run();
+  }
+  
+  public Simulation() {
+    // nothing to do
+  }
+  
+  public void run() {
     /**
      The set of ALL baboons in the simulation, though once we start running through the simulation, it will be those that remain
     */
