@@ -1,0 +1,4 @@
+Running the simulator:
+
+make
+java Simulation < crossing-data
